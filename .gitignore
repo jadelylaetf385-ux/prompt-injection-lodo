@@ -1,0 +1,19 @@
+# Environment
+.venv/
+__pycache__/
+*.pyc
+
+# Data are rebuilt from public sources by scripts 01-02 and are not redistributed
+data/
+
+# Large intermediate files
+results/**/*.parquet
+results/**/*.npy
+results/offtheshelf/evaluation_sample.csv
+
+# Manuscript drafts
+paper/
+
+# Credentials
+.env
+*.token
