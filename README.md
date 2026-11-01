@@ -27,6 +27,7 @@ Scripts 01–07 run on a CPU. Script 08 needs a GPU; `colab_finetune.ipynb` runs
 | `06_fewshot_adaptation.py` | Add k labelled examples of the held-out source (k = 0, 10, 50, 200, 1000) | `results/fewshot/` |
 | `07_bootstrap_ci.py` | Paired bootstrap confidence intervals for the random-versus-LODO gap | `results/bootstrap/` |
 | `08_finetune_encoder.py` | Fine-tuned transformer encoder under the same two protocols (GPU) | `results/finetune/` |
+| `09_shortcut_and_error_analysis.py` | Strongly weighted n-grams and their source concentration, attacks missed by all detectors, pairwise LODO comparison | `results/analysis/` |
 
 Run them in order, for example `python scripts/03_lodo_experiments.py`. Each script documents its options in its header (`--help`).
 
