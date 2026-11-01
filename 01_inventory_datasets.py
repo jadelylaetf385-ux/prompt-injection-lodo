@@ -1,4 +1,4 @@
-"""Download candidate prompt-injection datasets and write an inventory report.
+   scripts/"""Download candidate prompt-injection datasets and write an inventory report.
 
 For every candidate the script records whether it could be loaded, its splits,
 row counts, columns, licence, the distribution of any label column, text-length
