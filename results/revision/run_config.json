@@ -1,0 +1,8 @@
+{
+  "seed": 42,
+  "n_boot": 1000,
+  "cap": 3000,
+  "parts": [
+    "calibration"
+  ]
+}

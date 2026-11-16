@@ -49,7 +49,8 @@ DETECTORS = {  # name: (score file, threshold, operator)
     "minilm_lr": ("minilm/scores_minilm_lr.parquet", 0.5, ">="),
     "finetuned": ("finetune/scores_finetuned.parquet", 0.5, ">="),
 }
-PAIRS = [("char_svm", "word_lr"), ("word_lr", "minilm_lr"), ("char_svm", "finetuned"), ("word_lr", "finetuned")]
+PAIRS = [("char_svm", "word_lr"), ("word_lr", "minilm_lr"), ("char_svm", "minilm_lr"), ("char_svm", "finetuned"),
+         ("word_lr", "finetuned"), ("minilm_lr", "finetuned")]
 
 
 def log(message: str) -> None:

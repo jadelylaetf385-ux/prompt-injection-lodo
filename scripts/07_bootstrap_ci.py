@@ -86,7 +86,13 @@ def record_bootstrap(pair: pd.DataFrame, n_boot: int, rng: np.random.Generator) 
             "gap_boot_max": float(gap.max())}
 
 
-def source_bootstrap(pair: pd.DataFrame, n_boot: int, rng: np.random.Generator) -> tuple[float, float]:
+def source_bootstrap(pair: pd.DataFrame, n_boot: int, rng: np.random.Generator) -> dict:
+    """Resample the ten sources with replacement, keeping the fitted models and
+    their scores fixed. A source drawn twice contributes its records twice;
+    draws that contain only one label (no attack or no benign record) are
+    skipped. This measures how the gap varies with the mixture of the observed
+    sources, conditional on the fitted models; it does not retrain models on a
+    new set of sources."""
     groups = {s: g for s, g in pair.groupby("source")}
     names = sorted(groups)
     gaps = np.full(n_boot, np.nan)
@@ -96,7 +102,9 @@ def source_bootstrap(pair: pd.DataFrame, n_boot: int, rng: np.random.Generator) 
         if y.min() == y.max():
             continue
         gaps[b] = roc_auc_score(y, draw["s_lodo"]) - roc_auc_score(y, draw["s_random"])
-    return ci(gaps)
+    valid = gaps[~np.isnan(gaps)]
+    return {"ci": ci(gaps), "n_valid": int(len(valid)), "n_skipped": int(n_boot - len(valid)),
+            "share_nonnegative": float((valid >= 0).mean()), "max_gap": float(valid.max()), "draws": gaps}
 
 
 def per_source(pair: pd.DataFrame, threshold: float, op: str, n_boot: int, rng: np.random.Generator) -> list[dict]:
@@ -127,7 +135,7 @@ def main() -> None:
     args = parser.parse_args()
     OUT.mkdir(parents=True, exist_ok=True)
 
-    pooled_rows, source_rows = [], []
+    pooled_rows, source_rows, draws = [], [], []
     for name, (rel, threshold, op) in SCORE_FILES.items():
         path = RESULTS / rel
         if not path.exists():
@@ -137,7 +145,11 @@ def main() -> None:
         pair = load_pair(path)
         log(f"{name}: {len(pair):,} paired records")
         row = {"detector": name, **record_bootstrap(pair, args.n_boot, rng)}
-        row["gap_ci_source"] = source_bootstrap(pair, args.n_boot, rng)
+        sb = source_bootstrap(pair, args.n_boot, rng)
+        row["gap_ci_source"] = sb["ci"]
+        row.update(source_draws_valid=sb["n_valid"], source_draws_skipped=sb["n_skipped"],
+                   source_share_nonnegative=sb["share_nonnegative"], source_max_gap=sb["max_gap"])
+        draws.append(pd.DataFrame({"detector": name, "draw": np.arange(len(sb["draws"])), "gap": sb["draws"]}))
         pooled_rows.append(row)
         source_rows += [{"detector": name, **r} for r in per_source(pair, threshold, op, args.n_boot, rng)]
         log(f"  AUC random {row['auc_random']:.4f} {row['auc_random_ci']}, LODO {row['auc_lodo']:.4f} "
@@ -151,6 +163,7 @@ def main() -> None:
     pooled = pooled.drop(columns=["auc_random_ci", "auc_lodo_ci", "gap_ci_record", "gap_ci_source"])
     pooled.to_csv(OUT / "pooled_ci.csv", index=False)
     pd.DataFrame(source_rows).to_csv(OUT / "per_source_ci.csv", index=False)
+    pd.concat(draws).to_csv(OUT / "source_bootstrap_draws.csv", index=False)
     (OUT / "run_config.json").write_text(json.dumps({"n_boot": args.n_boot, "seed": SEED}, indent=2), encoding="utf-8")
     log("pooled:\n" + pooled.round(4).to_string(index=False))
 

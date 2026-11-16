@@ -1,0 +1,16 @@
+{
+  "model": "distilroberta-base",
+  "seed": 42,
+  "epochs": 3,
+  "run_name": "seed42_ep3",
+  "train_cap": 3000,
+  "max_length": 256,
+  "batch_size": 32,
+  "eval_batch_size": 128,
+  "eval_every": 300,
+  "lr": 3e-05,
+  "no_fp16": false,
+  "fp16": false,
+  "data_seed": 42,
+  "validation_fraction": 0.1
+}

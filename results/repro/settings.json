@@ -1,0 +1,9 @@
+{
+  "surface": "StandardScaler + LogisticRegression(lbfgs, C=1.0, L2, max_iter=2000, class_weight='balanced'); six features: log1p chars, log1p words, upper/digit/punctuation shares, log1p newlines",
+  "word_lr": "TfidfVectorizer(word 1-2, min_df=2, max_features=200000, sublinear_tf, lowercase) + LogisticRegression(liblinear, C=1.0, L2, max_iter=2000, class_weight='balanced'); threshold 0.5",
+  "char_svm": "TfidfVectorizer(char_wb 3-5, min_df=3, max_features=300000, sublinear_tf, lowercase) + LinearSVC(C=0.5, class_weight='balanced', max_iter=5000); threshold 0 on the decision function",
+  "minilm_lr": "all-MiniLM-L6-v2, max 256 tokens, L2-normalised 384-d embeddings + LogisticRegression(lbfgs, C=1.0, max_iter=3000, class_weight='balanced'); threshold 0.5",
+  "finetuned": "distilroberta-base, 1 epoch, AdamW lr 3e-5, weight decay 0.01, linear decay after 6% warm-up, batch 32, max 256 tokens (right truncation), class-weighted cross-entropy, fp16, gradient clip 1.0, seed 42; training cap 3,000 per source and label (sampling seed 42); no model selection",
+  "transforms": "every vectoriser, IDF, scaler and pruning step is fitted on the training part of each fold only",
+  "random_split": "StratifiedKFold(5, shuffle=True, random_state=42) on source x label strata"
+}
